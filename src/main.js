@@ -19,6 +19,7 @@ let page = 1;
 form.addEventListener('submit', async event => {
   event.preventDefault();
   query = input.value.trim();
+  input.value = '';
   if (!query) {
     iziToast.error({ title: 'Error', message: 'Please enter a search term!' });
     return;
@@ -48,13 +49,14 @@ form.addEventListener('submit', async event => {
 
 loadMoreBtn.addEventListener('click', async () => {
   page += 1;
+
   toggleLoader(true);
 
   try {
     const data = await fetchImages(query, page);
     renderImages(data.hits);
-    scrollPage();
 
+    scrollPage();
     if (page * 15 >= data.totalHits) {
       toggleLoadMore(false);
       iziToast.info({
@@ -68,9 +70,9 @@ loadMoreBtn.addEventListener('click', async () => {
   }
 });
 
-input.value = '';
-
 const classBtn = document.querySelector('button');
 classBtn.classList.add('form-btn');
 const classInput = document.querySelector('input');
 classInput.classList.add('form-input');
+const classBtnMore = document.querySelector('.load-more');
+classBtnMore.classList.add('form-btn-more');
