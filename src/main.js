@@ -3,47 +3,72 @@ import {
   renderImages,
   clearGallery,
   toggleLoader,
+  toggleLoadMore,
+  scrollPage,
 } from './js/render-functions.js';
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 
 const form = document.querySelector('.form');
 const input = form.querySelector('input');
+const loadMoreBtn = document.querySelector('.load-more');
 
-form.addEventListener('submit', event => {
+let query = '';
+let page = 1;
+
+form.addEventListener('submit', async event => {
   event.preventDefault();
-  handleSearch();
-  input.value = '';
-});
-
-function handleSearch() {
-  const query = input.value.trim();
-  if (!query) return showError('Please enter a search term!');
-
+  query = input.value.trim();
+  if (!query) {
+    iziToast.error({ title: 'Error', message: 'Please enter a search term!' });
+    return;
+  }
+  page = 1;
   clearGallery();
   toggleLoader(true);
+  toggleLoadMore(false);
 
-  fetchImages(query)
-    .then(data => {
-      if (!data.hits.length) {
-        showWarning(
-          'Sorry, there are no images matching your search query. Please try again!'
-        );
-      } else {
-        renderImages(data.hits);
-      }
-    })
-    .catch(() => showError('Something went wrong!'))
-    .finally(() => toggleLoader(false));
-}
+  try {
+    const data = await fetchImages(query, page);
+    if (data.hits.length === 0) {
+      iziToast.warning({
+        message:
+          'Sorry, there are no images matching your search query. Please try again!',
+      });
+    } else {
+      renderImages(data.hits);
+      toggleLoadMore(true);
+    }
+  } catch {
+    iziToast.error({ title: 'Error', message: 'Something went wrong!' });
+  } finally {
+    toggleLoader(false);
+  }
+});
 
-function showError(message) {
-  iziToast.error({ title: 'Error', message });
-}
+loadMoreBtn.addEventListener('click', async () => {
+  page += 1;
+  toggleLoader(true);
 
-function showWarning(message) {
-  iziToast.warning({ message });
-}
+  try {
+    const data = await fetchImages(query, page);
+    renderImages(data.hits);
+    scrollPage();
+
+    if (page * 15 >= data.totalHits) {
+      toggleLoadMore(false);
+      iziToast.info({
+        message: "We're sorry, but you've reached the end of search results.",
+      });
+    }
+  } catch {
+    iziToast.error({ title: 'Error', message: 'Something went wrong!' });
+  } finally {
+    toggleLoader(false);
+  }
+});
+
+input.value = '';
 
 const classBtn = document.querySelector('button');
 classBtn.classList.add('form-btn');

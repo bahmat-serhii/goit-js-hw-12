@@ -56,3 +56,23 @@ export function toggleLoader(isVisible) {
     loader.classList.add('hidden');
   }
 }
+export function toggleLoadMore(isVisible) {
+  const loadMore = document.querySelector('.load-more');
+  if (isVisible) {
+    loadMore.classList.remove('hidden');
+  } else {
+    loadMore.classList.add('hidden');
+  }
+}
+
+export function scrollPage() {
+  const firstCard = document.querySelector('.gallery').firstElementChild;
+  if (!firstCard) return;
+
+  const cardHeight = firstCard.getBoundingClientRect().height;
+
+  window.scrollBy({
+    top: cardHeight * 2,
+    behavior: 'smooth',
+  });
+}
