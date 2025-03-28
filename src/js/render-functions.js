@@ -4,7 +4,7 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 const gallery = document.querySelector('.gallery');
 
 export function renderImages(images) {
-  gallery.innerHTML = images
+  const imagesMarkup = images
     .map(
       ({
         webformatURL,
@@ -40,7 +40,7 @@ export function renderImages(images) {
         </li>`
     )
     .join('');
-
+  gallery.insertAdjacentHTML('beforeend', imagesMarkup);
   new SimpleLightbox('.gallery a').refresh();
 }
 
