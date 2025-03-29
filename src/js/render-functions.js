@@ -1,3 +1,5 @@
+import iziToast from 'izitoast';
+import 'izitoast/dist/css/iziToast.min.css';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
@@ -75,4 +77,16 @@ export function scrollPage() {
     top: cardHeight * 2,
     behavior: 'smooth',
   });
+}
+export function checkLoadMoreVisibility(totalHits, page, perPage) {
+  const totalLoaded = page * perPage;
+
+  if (totalLoaded >= totalHits) {
+    toggleLoadMore(false);
+    iziToast.info({
+      message: "We're sorry, but you've reached the end of search results.",
+    });
+  } else {
+    toggleLoadMore(true);
+  }
 }

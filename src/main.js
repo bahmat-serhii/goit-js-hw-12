@@ -5,6 +5,7 @@ import {
   toggleLoader,
   toggleLoadMore,
   scrollPage,
+  checkLoadMoreVisibility,
 } from './js/render-functions.js';
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
@@ -15,6 +16,8 @@ const loadMoreBtn = document.querySelector('.load-more');
 
 let query = '';
 let page = 1;
+const perPage = 15;
+let totalHits = 0;
 
 form.addEventListener('submit', async event => {
   event.preventDefault();
@@ -31,6 +34,8 @@ form.addEventListener('submit', async event => {
 
   try {
     const data = await fetchImages(query, page);
+    totalHits = data.totalHits;
+
     if (data.hits.length === 0) {
       iziToast.warning({
         message:
@@ -38,7 +43,7 @@ form.addEventListener('submit', async event => {
       });
     } else {
       renderImages(data.hits);
-      toggleLoadMore(true);
+      checkLoadMoreVisibility(totalHits, page, perPage);
     }
   } catch {
     iziToast.error({ title: 'Error', message: 'Something went wrong!' });
@@ -55,15 +60,9 @@ loadMoreBtn.addEventListener('click', async () => {
   try {
     const data = await fetchImages(query, page);
     renderImages(data.hits);
-
     scrollPage();
-    if (page * 15 >= data.totalHits) {
-      toggleLoadMore(false);
-      iziToast.info({
-        message: "We're sorry, but you've reached the end of search results.",
-      });
-    }
-  } catch {
+    checkLoadMoreVisibility(totalHits, page, perPage);
+  } catch (error) {
     iziToast.error({ title: 'Error', message: 'Something went wrong!' });
   } finally {
     toggleLoader(false);
